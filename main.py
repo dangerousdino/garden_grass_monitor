@@ -1,35 +1,44 @@
-import os 
-import sys
-import requests
-import random
+#!/usr/bin/python
+import RPi.GPIO as GPIO
 import time
+import requests
+ 
+#GPIO SETUP
+sensor_pin = 20
+relay_pin = 21
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(sensor_pin, GPIO.IN)
+GPIO.setup(relay_pin, GPIO.OUT)
 
-api_key = 1234
+# test the sensor to find out if the soil is moist
+def get_sensor(sensor_pin):
+    if GPIO.input(sensor_pin):
+        r = False
+    else:
+        r = True
 
-def get_sensor():
-    num = random.randint(1,100)
-    print(num)
-    return num
+    return r
 
+def turn_on(relay_pin):
 
-def turn_on():
-	print("Turning Hose Pipe On")
+	GPIO.output(relay_pin, GPIO.LOW) # out
+	GPIO.output(relay_pin, GPIO.HIGH) # on
 
-def turn_off():
-    print("Turning Hose Pipe Off")
+def turn_off(relay_pin):
+	GPIO.output(relay_pin, GPIO.LOW) # out
+	GPIO.output(relay_pin, GPIO.LOW) # on
 
 def main():
-  
+
     while True:
-    	sensor_info = get_sensor()
-    	if sensor_info < 80:
-    		print("doing this")
-    		turn_on()
-    		time.sleep(10)
-    	else: 
-    		print("not doing this")
-    		turn_off()
-    		time.sleep(10)
+        result = get_sensor(sensor_pin)
+        if result == True:
+    	    print("Water Detected")
+    	    turn_off(relay_pin)
+    	    time.sleep(10)
+        else:
+    	    print("No Water Detected")
+    	    turn_on(relay_pin)
+    	    time.sleep(10)
 
 main()
-
